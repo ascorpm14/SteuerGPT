@@ -1,0 +1,76 @@
+# @AsTech — Hermes Main Configuration
+agent:
+  max_turns: 150
+  gateway_timeout: 1800
+  api_max_retries: 3
+  tool_use_enforcement: auto
+  task_completion_guidance: true
+  parallel_tool_call_guidance: true
+  environment_probe: true
+  coding_context: auto
+  image_input_mode: auto
+  verify_on_stop: true
+  reasoning_effort: medium
+
+model:
+  default: deepseek-v4-flash
+  provider: deepseek
+  base_url: https://api.deepseek.com/v1
+
+providers:
+  ollama:
+    base_url: http://127.0.0.1:11434/v1
+
+fallback_providers: []
+
+terminal:
+  backend: local
+  timeout: 180
+  cwd: /etc/hermes/data
+
+gateway:
+  strict: false
+  api_server:
+    max_concurrent_runs: 10
+  message_timestamps:
+    enabled: true
+  trust_recent_files: true
+  allow_all_users: true
+
+plugins:
+  enabled:
+    - platforms/whatsapp
+  disabled: []
+
+memory:
+  memory_enabled: true
+  user_profile_enabled: true
+  write_approval: false
+  memory_char_limit: 4000
+  user_char_limit: 2000
+  provider: file
+  nudge_interval: 20
+  flush_min_turns: 6
+
+delegation:
+  model: deepseek-v4-flash
+  provider: deepseek
+  base_url: https://api.deepseek.com/v1
+  max_iterations: 30
+  max_concurrent_children: 3
+  max_spawn_depth: 1
+
+compression:
+  enabled: true
+  threshold: 0.5
+  target_ratio: 0.2
+  protect_last_n: 20
+
+streaming:
+  enabled: true
+  transport: auto
+
+stt:
+  enabled: false
+
+use_gateway: true

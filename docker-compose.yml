@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  as-tech-postgres:
+    image: postgres:16
+    container_name: as-tech-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    volumes:
+      - as-tech-postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: astach
+      POSTGRES_USER: astach
+      POSTGRES_PASSWORD: astach_secret_2026
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U astach -d astach"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  as-tech-hermes:
+    build: .
+    container_name: as-tech-hermes
+    hostname: as-tech
+    restart: unless-stopped
+    depends_on:
+      - as-tech-n8n
+      - as-tech-postgres
+    volumes:
+      - as-tech-hermes-data:/etc/hermes/data
+      - as-tech-hermes-logs:/var/log/as-tech
+      - as-tech-memories:/etc/hermes/profiles/as-tech/memories
+      - ./hermes/profiles/as-tech/skills:/etc/hermes/profiles/as-tech/skills:ro
+    environment:
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:?err}
+      - HERMES_HOME=/etc/hermes
+      - N8N_URL=http://as-tech-n8n:5678
+      - POSTGRES_HOST=as-tech-postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=astach
+      - POSTGRES_USER=astach
+      - POSTGRES_PASSWORD=astach_secret_2026
+
+  as-tech-n8n:
+    image: n8nio/n8n:latest
+    container_name: as-tech-n8n
+    restart: unless-stopped
+    depends_on:
+      - as-tech-postgres
+    ports:
+      - "5678:5678"
+    volumes:
+      - as-tech-n8n-data:/home/node/.n8n
+      - ./n8n/workflows:/home/node/.n8n/workflows:ro
+    environment:
+      - N8N_PORT=5678
+      - N8N_HOST=0.0.0.0
+      - N8N_PROTOCOL=http
+
+volumes:
+  as-tech-hermes-data:
+  as-tech-hermes-logs:
+  as-tech-n8n-data:
+  as-tech-memories:
+  as-tech-postgres-data:
